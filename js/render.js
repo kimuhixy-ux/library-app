@@ -57,6 +57,8 @@ const Render = (() => {
       ['出版社', book.publisher],
       ['ISBN', book.isbn],
       ['登録日', book.registeredAt],
+      ['原作の国', book.originCountry],
+      ['初版発行日', book.firstPublishedDate],
     ];
     for (const [label, value] of basics) {
       const el = field(label, value);

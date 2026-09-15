@@ -28,12 +28,31 @@ const Scan = (() => {
     };
   }
 
-  function buildForm(container, prefill, onSubmit) {
+  // openBDに無い書誌(古い文庫の再版など)をNDLサーチ(国立国会図書館)で補うフォールバック
+  // なぜ自前のAPI経由か: ndlsearch.ndl.go.jpはCORS非対応のため、ブラウザから直接fetchできない
+  async function lookupNdl(isbn) {
+    const res = await fetch(`/api/ndl-lookup?isbn=${encodeURIComponent(isbn)}`);
+    if (!res.ok) return null;
+    const info = await res.json();
+    if (!info || !info.title) return null;
+    return info;
+  }
+
+  function buildForm(container, prefill, onSubmit, note) {
     container.textContent = '';
 
     const heading = document.createElement('h2');
     heading.textContent = '本の情報を確認';
     container.appendChild(heading);
+
+    // note: この時点で以前のstatus要素はcontainer.textContent=''により消えているため、
+    // 案内文はフォーム側で改めて表示する
+    if (note) {
+      const noteEl = document.createElement('p');
+      noteEl.className = 'scan-status';
+      noteEl.textContent = note;
+      container.appendChild(noteEl);
+    }
 
     const fields = {};
     const rows = [
@@ -44,6 +63,8 @@ const Scan = (() => {
       ['synopsis', 'あらすじ', 'textarea'],
       ['characterRelations', '登場人物の相関', 'textarea'],
       ['themes', 'テーマ', 'textarea'],
+      ['originCountry', '原作の国', 'input'],
+      ['firstPublishedDate', '初版発行日', 'input'],
     ];
 
     for (const [key, label, tag] of rows) {
@@ -73,6 +94,8 @@ const Scan = (() => {
         synopsis: fields.synopsis.value.trim(),
         characterRelations: fields.characterRelations.value.trim(),
         themes: fields.themes.value.trim(),
+        originCountry: fields.originCountry.value.trim(),
+        firstPublishedDate: fields.firstPublishedDate.value.trim(),
       };
       onSubmit(book);
     });
@@ -134,13 +157,16 @@ const Scan = (() => {
         await stopScanner();
         status.textContent = `ISBN ${isbn} を検索中...`;
         try {
-          const info = await lookupOpenBd(isbn);
+          const info = (await lookupOpenBd(isbn)) || (await lookupNdl(isbn));
           if (!info) {
-            status.textContent = 'openBDに情報が見つかりませんでした。手入力してください。';
-            buildForm(container, { isbn }, (book) => saveBook(book, { onSaved, statusEl: status }));
+            buildForm(
+              container,
+              { isbn },
+              (book) => saveBook(book, { onSaved, statusEl: status }),
+              'openBDにも国立国会図書館サーチにも情報が見つかりませんでした。手入力してください。'
+            );
             return;
           }
-          status.remove();
           buildForm(container, info, (book) => saveBook(book, { onSaved, statusEl: status }));
         } catch (e) {
           status.textContent = `検索エラー: ${e.message}`;
