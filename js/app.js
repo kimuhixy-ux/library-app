@@ -13,6 +13,7 @@
   const GROUP_OPTIONS = {
     country: { keyFn: (book) => book.originCountry, unknownLabel: '国不明' },
     author: { keyFn: (book) => book.author, unknownLabel: '著者不明' },
+    publisher: { keyFn: (book) => book.publisher, unknownLabel: '出版社不明' },
   };
 
   function openSheet(el) {
