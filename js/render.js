@@ -30,6 +30,60 @@ const Render = (() => {
     return wrap;
   }
 
+  function externalLink(label, url) {
+    const link = document.createElement('a');
+    link.className = 'external-link';
+    link.href = url;
+    link.textContent = label;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    return link;
+  }
+
+  // 販売サイトと読書メモサイトへのリンク一覧を組み立てる
+  // なぜGoogleのsite検索経由か: 読書メーター・ブクログは内部検索のURL仕様が不確かで、
+  // ISBNやタイトルで直接リンクを組み立てると本が見つからない場合があるため
+  function buildExternalLinks(book) {
+    const wrap = document.createElement('div');
+    wrap.className = 'detail-field';
+
+    const shopHeading = document.createElement('h3');
+    shopHeading.textContent = '販売サイトで見る';
+    wrap.appendChild(shopHeading);
+
+    const shopList = document.createElement('div');
+    shopList.className = 'link-list';
+    if (book.detailUrl) {
+      shopList.appendChild(externalLink('楽天ブックス', book.detailUrl));
+    }
+    if (book.isbn) {
+      shopList.appendChild(
+        externalLink('Amazon', `https://www.amazon.co.jp/s?k=${encodeURIComponent(book.isbn)}`)
+      );
+    }
+    wrap.appendChild(shopList);
+
+    const query = `${book.title} ${book.author}`.trim();
+    if (query) {
+      const noteHeading = document.createElement('h3');
+      noteHeading.textContent = '他の人の読書メモを見る';
+      wrap.appendChild(noteHeading);
+
+      const noteList = document.createElement('div');
+      noteList.className = 'link-list';
+      const encodedQuery = encodeURIComponent(query);
+      noteList.appendChild(
+        externalLink('読書メーター', `https://www.google.com/search?q=site:bookmeter.com+${encodedQuery}`)
+      );
+      noteList.appendChild(
+        externalLink('ブクログ', `https://www.google.com/search?q=site:booklog.jp+${encodedQuery}`)
+      );
+      wrap.appendChild(noteList);
+    }
+
+    return wrap;
+  }
+
   function renderDetail(container, book) {
     container.textContent = '';
 
@@ -75,14 +129,7 @@ const Render = (() => {
       if (el) container.appendChild(el);
     }
 
-    if (book.detailUrl) {
-      const link = document.createElement('a');
-      link.href = book.detailUrl;
-      link.textContent = '楽天ブックスで見る';
-      link.target = '_blank';
-      link.rel = 'noopener';
-      container.appendChild(link);
-    }
+    container.appendChild(buildExternalLinks(book));
   }
 
   return { renderList, renderDetail };

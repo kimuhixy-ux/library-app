@@ -155,6 +155,21 @@ const Scan = (() => {
     html5QrCode
       .start({ facingMode: 'environment' }, config, async (isbn) => {
         await stopScanner();
+
+        // 同じISBNが既に蔵書内にある場合は、再検索せずその旨を伝えて既存データをプリフィルする
+        // (物理的な重複所有もあり得るため、保存自体は引き続き可能にする)
+        const existing = BookStore.findByIsbn(isbn);
+        if (existing.length) {
+          const info = existing[0];
+          buildForm(
+            container,
+            info,
+            (book) => saveBook(book, { onSaved, statusEl: status }),
+            `この本は既に登録されています(登録日: ${info.registeredAt || '不明'})。同じ本をもう一冊登録する場合はそのまま保存してください。`
+          );
+          return;
+        }
+
         status.textContent = `ISBN ${isbn} を検索中...`;
         try {
           const info = (await lookupOpenBd(isbn)) || (await lookupNdl(isbn));

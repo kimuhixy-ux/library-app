@@ -43,9 +43,13 @@ const BookStore = (() => {
     return books.filter((b) => b.title === title);
   }
 
+  function findByIsbn(isbn) {
+    return books.filter((b) => b.isbn === isbn);
+  }
+
   function addLocal(book) {
     books.unshift(book);
   }
 
-  return { load, getAll, getById, search, findByTitle, addLocal };
+  return { load, getAll, getById, search, findByTitle, findByIsbn, addLocal };
 })();
