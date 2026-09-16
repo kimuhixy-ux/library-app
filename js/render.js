@@ -3,17 +3,51 @@
 const Render = (() => {
   const cardTemplate = document.getElementById('book-card-template');
 
+  function buildCard(book, onSelect) {
+    const card = cardTemplate.content.firstElementChild.cloneNode(true);
+    const cover = card.querySelector('.book-card-cover');
+    cover.src = book.coverImageUrl || '';
+    cover.alt = book.title;
+    card.querySelector('.book-card-title').textContent = book.title;
+    card.querySelector('.book-card-author').textContent = book.author;
+    card.addEventListener('click', () => onSelect(book));
+    return card;
+  }
+
   function renderList(container, books, onSelect) {
     container.textContent = '';
     for (const book of books) {
-      const card = cardTemplate.content.firstElementChild.cloneNode(true);
-      const cover = card.querySelector('.book-card-cover');
-      cover.src = book.coverImageUrl || '';
-      cover.alt = book.title;
-      card.querySelector('.book-card-title').textContent = book.title;
-      card.querySelector('.book-card-author').textContent = book.author;
-      card.addEventListener('click', () => onSelect(book));
-      container.appendChild(card);
+      container.appendChild(buildCard(book, onSelect));
+    }
+  }
+
+  // 国別整理オプション用: originCountryごとに見出し+グリッドを並べる
+  // なぜMapで集約するか: 国名の出現順に関わらず、見出しの並び順を安定させたいため
+  function renderGroupedByCountry(container, books, onSelect) {
+    container.textContent = '';
+    const groups = new Map();
+    for (const book of books) {
+      const key = book.originCountry || '国不明';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(book);
+    }
+    const keys = [...groups.keys()].sort((a, b) => {
+      if (a === '国不明') return 1;
+      if (b === '国不明') return -1;
+      return a.localeCompare(b, 'ja');
+    });
+    for (const key of keys) {
+      const heading = document.createElement('h2');
+      heading.className = 'country-heading';
+      heading.textContent = `${key}(${groups.get(key).length})`;
+      container.appendChild(heading);
+
+      const grid = document.createElement('div');
+      grid.className = 'book-list';
+      for (const book of groups.get(key)) {
+        grid.appendChild(buildCard(book, onSelect));
+      }
+      container.appendChild(grid);
     }
   }
 
@@ -132,5 +166,5 @@ const Render = (() => {
     container.appendChild(buildExternalLinks(book));
   }
 
-  return { renderList, renderDetail };
+  return { renderList, renderGroupedByCountry, renderDetail };
 })();

@@ -3,6 +3,7 @@
   const listEl = document.getElementById('book-list');
   const emptyEl = document.getElementById('empty-message');
   const searchInput = document.getElementById('search-input');
+  const sortSelect = document.getElementById('sort-select');
   const detailView = document.getElementById('detail-view');
   const detailContent = document.getElementById('detail-content');
   const addView = document.getElementById('add-view');
@@ -17,10 +18,17 @@
   }
 
   function showList(books) {
-    Render.renderList(listEl, books, (book) => {
+    const onSelect = (book) => {
       Render.renderDetail(detailContent, book);
       openSheet(detailView);
-    });
+    };
+    const grouped = sortSelect.value === 'country';
+    listEl.classList.toggle('grouped', grouped);
+    if (grouped) {
+      Render.renderGroupedByCountry(listEl, books, onSelect);
+    } else {
+      Render.renderList(listEl, books, onSelect);
+    }
     emptyEl.hidden = books.length !== 0;
   }
 
@@ -33,6 +41,10 @@
   });
 
   searchInput.addEventListener('input', () => {
+    showList(BookStore.search(searchInput.value));
+  });
+
+  sortSelect.addEventListener('change', () => {
     showList(BookStore.search(searchInput.value));
   });
 

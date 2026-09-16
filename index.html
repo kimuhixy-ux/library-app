@@ -13,7 +13,13 @@
 
 <header class="app-header">
   <h1>蔵書管理</h1>
-  <input id="search-input" type="search" placeholder="タイトル・著者で検索" autocomplete="off">
+  <div class="control-row">
+    <input id="search-input" type="search" placeholder="タイトル・著者で検索" autocomplete="off">
+    <select id="sort-select" aria-label="並び替え">
+      <option value="normal">通常表示</option>
+      <option value="country">国別に整理</option>
+    </select>
+  </div>
 </header>
 
 <main id="book-list" class="book-list" aria-live="polite"></main>

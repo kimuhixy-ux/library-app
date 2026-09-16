@@ -52,8 +52,14 @@ img {
   margin: 0 0 8px;
 }
 
+.control-row {
+  display: flex;
+  gap: 8px;
+}
+
 #search-input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 44px;
   padding: 0 12px;
   border: 1px solid var(--border);
@@ -63,11 +69,38 @@ img {
   font-size: 16px;
 }
 
+#sort-select {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
 .book-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+.book-list.grouped {
+  display: block;
+  padding-bottom: 0;
+}
+
+.country-heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sub);
+  margin: 20px 0 8px;
+}
+
+.country-heading:first-child {
+  margin-top: 4px;
 }
 
 .book-card {
