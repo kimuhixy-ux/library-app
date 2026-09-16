@@ -9,6 +9,12 @@
   const addView = document.getElementById('add-view');
   const addButton = document.getElementById('add-button');
 
+  // 整理オプションごとの集約キー(モード→本から見出し文字列を取り出す関数と、未設定時のラベル)
+  const GROUP_OPTIONS = {
+    country: { keyFn: (book) => book.originCountry, unknownLabel: '国不明' },
+    author: { keyFn: (book) => book.author, unknownLabel: '著者不明' },
+  };
+
   function openSheet(el) {
     el.hidden = false;
   }
@@ -22,10 +28,10 @@
       Render.renderDetail(detailContent, book);
       openSheet(detailView);
     };
-    const grouped = sortSelect.value === 'country';
-    listEl.classList.toggle('grouped', grouped);
-    if (grouped) {
-      Render.renderGroupedByCountry(listEl, books, onSelect);
+    const group = GROUP_OPTIONS[sortSelect.value];
+    listEl.classList.toggle('grouped', !!group);
+    if (group) {
+      Render.renderGrouped(listEl, books, onSelect, group.keyFn, group.unknownLabel);
     } else {
       Render.renderList(listEl, books, onSelect);
     }

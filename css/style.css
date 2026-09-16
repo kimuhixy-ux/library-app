@@ -92,14 +92,14 @@ img {
   padding-bottom: 0;
 }
 
-.country-heading {
+.group-heading {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-sub);
   margin: 20px 0 8px;
 }
 
-.country-heading:first-child {
+.group-heading:first-child {
   margin-top: 4px;
 }
 

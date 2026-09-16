@@ -21,24 +21,24 @@ const Render = (() => {
     }
   }
 
-  // 国別整理オプション用: originCountryごとに見出し+グリッドを並べる
-  // なぜMapで集約するか: 国名の出現順に関わらず、見出しの並び順を安定させたいため
-  function renderGroupedByCountry(container, books, onSelect) {
+  // 整理オプション用: keyFnが返す値(国・著者など)ごとに見出し+グリッドを並べる
+  // なぜMapで集約するか: 出現順に関わらず、見出しの並び順を安定させたいため
+  function renderGrouped(container, books, onSelect, keyFn, unknownLabel) {
     container.textContent = '';
     const groups = new Map();
     for (const book of books) {
-      const key = book.originCountry || '国不明';
+      const key = keyFn(book) || unknownLabel;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(book);
     }
     const keys = [...groups.keys()].sort((a, b) => {
-      if (a === '国不明') return 1;
-      if (b === '国不明') return -1;
+      if (a === unknownLabel) return 1;
+      if (b === unknownLabel) return -1;
       return a.localeCompare(b, 'ja');
     });
     for (const key of keys) {
       const heading = document.createElement('h2');
-      heading.className = 'country-heading';
+      heading.className = 'group-heading';
       heading.textContent = `${key}(${groups.get(key).length})`;
       container.appendChild(heading);
 
@@ -166,5 +166,5 @@ const Render = (() => {
     container.appendChild(buildExternalLinks(book));
   }
 
-  return { renderList, renderGroupedByCountry, renderDetail };
+  return { renderList, renderGrouped, renderDetail };
 })();
