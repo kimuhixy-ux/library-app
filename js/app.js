@@ -9,11 +9,20 @@
   const addView = document.getElementById('add-view');
   const addButton = document.getElementById('add-button');
 
+  // firstPublishedDateは "2020-11-20" 等の年始まりの表記が大半だが、
+  // "前385年頃" のような特殊表記もあるため、先頭の西暦4桁だけを取り出して10年単位に丸める
+  function decadeOf(book) {
+    const m = /^(\d{4})/.exec(book.firstPublishedDate || '');
+    if (!m) return null;
+    return `${Math.floor(Number(m[1]) / 10) * 10}年代`;
+  }
+
   // 整理オプションごとの集約キー(モード→本から見出し文字列を取り出す関数と、未設定時のラベル)
   const GROUP_OPTIONS = {
     country: { keyFn: (book) => book.originCountry, unknownLabel: '国不明' },
     author: { keyFn: (book) => book.author, unknownLabel: '著者不明' },
     publisher: { keyFn: (book) => book.publisher, unknownLabel: '出版社不明' },
+    decade: { keyFn: decadeOf, unknownLabel: '年代不明' },
   };
 
   function openSheet(el) {

@@ -1,6 +1,6 @@
 // sw.js: HTML/JSONはネットワーク優先、CSS/JS/画像はキャッシュ優先
 // データやコードを更新したらCACHE_NAMEの番号を必ず上げる(上げ忘れると古い版が端末に残る)
-const CACHE_NAME = 'library-app-cache-v8';
+const CACHE_NAME = 'library-app-cache-v9';
 const CORE_ASSETS = [
   './',
   'index.html',
