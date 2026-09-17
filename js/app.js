@@ -43,7 +43,10 @@
     if (group) {
       Render.renderGrouped(listEl, books, onSelect, group.keyFn, group.unknownLabel);
     } else {
-      Render.renderList(listEl, books, onSelect);
+      // data/books.jsonの並び順(登録日降順)にBiblia差分の追記分が続くため、
+      // 通常表示では登録日(registeredAt)の新しい順に並べ直して表示する
+      const sorted = [...books].sort((a, b) => b.registeredAt.localeCompare(a.registeredAt));
+      Render.renderList(listEl, sorted, onSelect);
     }
     emptyEl.hidden = books.length !== 0;
   }
