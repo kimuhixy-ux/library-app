@@ -1,6 +1,6 @@
 // sw.js: HTML/JSONはネットワーク優先、CSS/JS/画像はキャッシュ優先
 // データやコードを更新したらCACHE_NAMEの番号を必ず上げる(上げ忘れると古い版が端末に残る)
-const CACHE_NAME = 'library-app-cache-v12';
+const CACHE_NAME = 'library-app-cache-v13';
 const CORE_ASSETS = [
   './',
   'index.html',
@@ -16,8 +16,16 @@ const CORE_ASSETS = [
 self.addEventListener('install', (event) => {
   // 新しいSWをすぐ有効化する(古いSWが端末に残り続けて更新が反映されない問題への対策)
   self.skipWaiting();
+  // ブラウザの通常HTTPキャッシュ(cache-control: max-age)から古いファイルを拾ってしまい、
+  // 新しいCACHE_NAMEの中に古い内容が保存される事故を防ぐため、fetchはHTTPキャッシュを無視する
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        CORE_ASSETS.map((url) =>
+          fetch(url, { cache: 'reload' }).then((response) => cache.put(url, response))
+        )
+      )
+    )
   );
 });
 
