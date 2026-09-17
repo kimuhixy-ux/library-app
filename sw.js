@@ -1,6 +1,6 @@
 // sw.js: HTML/JSONはネットワーク優先、CSS/JS/画像はキャッシュ優先
 // データやコードを更新したらCACHE_NAMEの番号を必ず上げる(上げ忘れると古い版が端末に残る)
-const CACHE_NAME = 'library-app-cache-v10';
+const CACHE_NAME = 'library-app-cache-v11';
 const CORE_ASSETS = [
   './',
   'index.html',
@@ -14,6 +14,8 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  // 新しいSWをすぐ有効化する(古いSWが端末に残り続けて更新が反映されない問題への対策)
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
   );
@@ -21,9 +23,13 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
-    )
+    Promise.all([
+      caches.keys().then((names) =>
+        Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      ),
+      // 開いたままのタブもすぐ新しいSWの制御下に置く(アプリを完全終了しなくても更新が効くようにする)
+      self.clients.claim(),
+    ])
   );
 });
 
